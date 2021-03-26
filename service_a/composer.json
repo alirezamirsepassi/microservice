@@ -1,0 +1,34 @@
+{
+  "name": "helloprint/service_a",
+  "description": "Service A",
+  "authors": [
+    {
+      "name": "Alireza Mirsepassi",
+      "email": "alirezamirsepassi@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4",
+    "ext-rdkafka": "*",
+    "enqueue/rdkafka": "^0.10.9",
+    "symfony/http-client": "^5.2"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "extra": {
+  },
+  "autoload": {
+    "psr-4": {
+      "ServiceA\\": "src/Application"
+    },
+    "files": [
+    ]
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "scripts": {
+  }
+}

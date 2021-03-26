@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 // Configure Kafka
 $factory = new \Enqueue\RdKafka\RdKafkaConnectionFactory(

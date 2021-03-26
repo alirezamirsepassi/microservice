@@ -1,0 +1,102 @@
+version: "3.7"
+
+networks:
+  hellonetwork:
+
+services:
+  broker:
+    build:
+      context: ./broker
+      dockerfile: ../.docker/php/Dockerfile
+    restart: always
+    depends_on:
+      database:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - hellonetwork
+
+  requester:
+    build:
+      context: ./requester
+      dockerfile: ../.docker/php/Dockerfile
+    restart: always
+    depends_on:
+      broker:
+        condition: service_started
+    networks:
+      - hellonetwork
+
+  service_a:
+    build:
+      context: ./service_a
+      dockerfile: ../.docker/php/Dockerfile
+    restart: always
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - hellonetwork
+
+  service_b:
+    build:
+      context: ./service_b
+      dockerfile: ../.docker/php/Dockerfile
+    restart: always
+    depends_on:
+      database:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - hellonetwork
+
+  database:
+    build: .docker/postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=hellodb
+      - POSTGRES_PASSWORD=hellopass
+      - POSTGRES_USER=hellouser
+    volumes:
+      - database_data:/var/lib/postgresql/data:rw
+    networks:
+      - hellonetwork
+
+  zookeeper:
+    image: bitnami/zookeeper
+    volumes:
+      - zookeeper_data:/bitnami:rw
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - hellonetwork
+
+  kafka:
+    build: .docker/kafka
+    volumes:
+      - kafka_data:/bitnami:rw
+    networks:
+      - hellonetwork
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+    healthcheck:
+      test: ["CMD", "kafka-ping.sh"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+
+volumes:
+  database_data:
+  zookeeper_data:
+  kafka_data:

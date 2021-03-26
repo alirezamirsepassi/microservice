@@ -1,0 +1,33 @@
+{
+  "name": "helloprint/requester",
+  "description": "Requester",
+  "authors": [
+    {
+      "name": "Alireza Mirsepassi",
+      "email": "alirezamirsepassi@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4",
+    "react/event-loop": "^1.1.1",
+    "symfony/http-client": "^5.2"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "extra": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Requester\\": "src/Application"
+    },
+    "files": [
+    ]
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "scripts": {
+  }
+}

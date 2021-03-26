@@ -1,0 +1,34 @@
+{
+  "name": "helloprint/service_b",
+  "description": "Service B",
+  "authors": [
+    {
+      "name": "Alireza Mirsepassi",
+      "email": "alirezamirsepassi@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4",
+    "ext-rdkafka": "*",
+    "doctrine/dbal": "^3.0",
+    "enqueue/rdkafka": "^0.10.9"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true
+  },
+  "extra": {
+  },
+  "autoload": {
+    "psr-4": {
+      "ServiceB\\": "src/Application"
+    },
+    "files": [
+    ]
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "scripts": {
+  }
+}

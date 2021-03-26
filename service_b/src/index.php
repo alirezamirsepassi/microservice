@@ -1,12 +1,12 @@
 <?php
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 // Configure Kafka
 $factory = new \Enqueue\RdKafka\RdKafkaConnectionFactory(
     [
         'global' => [
-            'group.id'             => uniqid('', true),
+            'group.id'             => 'service_b',
             'metadata.broker.list' => 'kafka:9092',
             'enable.auto.commit'   => 'false',
         ],

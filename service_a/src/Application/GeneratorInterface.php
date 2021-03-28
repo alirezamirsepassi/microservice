@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ServiceA;
 
 interface GeneratorInterface
 {
-    public function generate();
+    public function generate(): string;
 }

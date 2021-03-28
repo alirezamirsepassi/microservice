@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ServiceA;
 
 final class RandomNameGenerator implements GeneratorInterface
 {
-    private array $names = [
+    private const NAMES = [
         'Joao',
         'Bram',
         'Gabriel',
@@ -19,6 +21,6 @@ final class RandomNameGenerator implements GeneratorInterface
 
     public function generate(): string
     {
-        return $this->names[array_rand($this->names)];
+        return self::NAMES[array_rand(self::NAMES)];
     }
 }

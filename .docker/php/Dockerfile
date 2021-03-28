@@ -32,6 +32,7 @@ RUN set -eux; \
 
 RUN composer dump-autoload --no-interaction
 
+COPY config config/
 COPY src src/
 
 VOLUME /srv/app

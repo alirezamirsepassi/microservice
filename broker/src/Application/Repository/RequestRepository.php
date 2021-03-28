@@ -1,14 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Broker\Repository;
 
 use Doctrine\DBAL\Connection;
 
-/**
- * Class RequestRepository
- *
- * @package Broker\Repository
- */
 final class RequestRepository implements RequestRepositoryInterface
 {
     private Connection $connection;
@@ -20,8 +17,10 @@ final class RequestRepository implements RequestRepositoryInterface
 
     /**
      * @inheritDoc
+     *
+     * @throws \Doctrine\DBAL\Exception
      */
-    public function create(string $message): string
+    public function create(string $message): int
     {
         $this->connection
             ->createQueryBuilder()
@@ -30,11 +29,13 @@ final class RequestRepository implements RequestRepositoryInterface
             ->setParameter('message', $message)
             ->execute();
 
-        return $this->connection->lastInsertId();
+        return (int) $this->connection->lastInsertId();
     }
 
     /**
      * @inheritDoc
+     *
+     * @throws \Doctrine\DBAL\Exception
      */
     public function update(int $id, string $message): void
     {
@@ -50,6 +51,8 @@ final class RequestRepository implements RequestRepositoryInterface
 
     /**
      * @inheritDoc
+     *
+     * @throws \Doctrine\DBAL\Exception
      */
     public function findOneById(int $id): array
     {

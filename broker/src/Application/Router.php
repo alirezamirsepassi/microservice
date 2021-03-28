@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Broker;
 
 use FastRoute\Dispatcher;
@@ -33,7 +35,7 @@ final class Router
             case Dispatcher::FOUND:
                 $params = $route[2];
 
-                return $route[1]($request, ... array_values($params));
+                return $route[1]($request, ...array_values($params));
         }
 
         throw new LogicException('Something wrong with routing!');

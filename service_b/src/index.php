@@ -1,40 +1,27 @@
 <?php
 
-require __DIR__.'/../vendor/autoload.php';
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
 
 // Configure Kafka
-$factory = new \Enqueue\RdKafka\RdKafkaConnectionFactory(
-    [
-        'global' => [
-            'group.id'             => uniqid('', true),
-            'metadata.broker.list' => 'kafka:9092',
-            'enable.auto.commit'   => 'false',
-        ],
-        'topic'  => [
-            'auto.offset.reset'        => 'beginning',
-            'allow.auto.create.topics' => 'true',
-        ],
-    ]
-);
-
+$factory = new \Enqueue\RdKafka\RdKafkaConnectionFactory(\ServiceB\ConfigResolver::resolve('kafka'));
 
 $context = $factory->createContext();
-
-$queue = $context->createQueue('Topic_B');
-
-$consumer = $context->createConsumer($queue);
+$topic = $context->createTopic('Topic_B');
+$consumer = $context->createConsumer($topic);
 
 $repository = new \ServiceB\Repository\RequestRepository(
     \Doctrine\DBAL\DriverManager::getConnection(['url' => 'pgsql://hellouser:hellopass@database/hellodb'])
 );
-
 
 while ($message = $consumer->receive()) {
     echo "Appending \"Bye\" to message {$message->getBody()} on topic B\n";
 
     // Update message
     try {
-        $repository->update($message->getProperty('id'), "{$message->getBody()} Bye");
+        $repository->update((int) $message->getProperty('id'), "{$message->getBody()} Bye");
+
         $consumer->acknowledge($message);
     } catch (\Exception $e) {
         $consumer->reject($message);

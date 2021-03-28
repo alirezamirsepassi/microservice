@@ -1,12 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Broker\Controller;
 
 use Broker\Repository\RequestRepositoryInterface;
 use Exception;
 use Interop\Queue\Context;
-use Interop\Queue\Exception\InvalidDestinationException;
-use Interop\Queue\Exception\InvalidMessageException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use React\Http\Message\Response;
@@ -26,13 +26,13 @@ final class RequestController
     /**
      * Create request
      *
-     * @throws Exception
+     * @throws \Exception
      * @throws \Interop\Queue\Exception
      */
     public function create(ServerRequestInterface $request): ResponseInterface
     {
-        $data = $this->deserialize($request);
-        if (!$this->validate($data)) {
+        $data = $this->unserialize($request);
+        if (! $this->validate($data)) {
             return $this->json(422, ['error' => 'Validation error has been detected!']);
         }
 
@@ -45,29 +45,31 @@ final class RequestController
     /**
      * Updates the request
      *
-     * @throws Exception
+     * @throws \Exception
      * @throws \Interop\Queue\Exception
      */
-    public function update(ServerRequestInterface $request, $id): ResponseInterface
+    public function update(ServerRequestInterface $request, string $id): ResponseInterface
     {
-        $data = $this->deserialize($request);
-        if (!$this->validate($data)) {
+        $data = $this->unserialize($request);
+        if (! $this->validate($data)) {
             return $this->json(422, ['error' => 'Validation error has been detected!']);
         }
 
-        $this->repository->update($id, $data['message']);
-        $this->dispatch($id, $data['message'], 'Topic_B');
+        $this->repository->update((int) $id, $data['message']);
+        $this->dispatch((int) $id, $data['message'], 'Topic_B');
 
         return $this->json(200, $data);
     }
 
     /**
      * Returns the request
+     *
+     * @throws \JsonException
      */
-    public function show(ServerRequestInterface $request, $id): ResponseInterface
+    public function show(ServerRequestInterface $request, string $id): ResponseInterface
     {
         try {
-            $data = $this->repository->findOneById($id);
+            $data = $this->repository->findOneById((int) $id);
 
             return $this->json(200, $data);
         } catch (Exception $exception) {
@@ -78,7 +80,7 @@ final class RequestController
     /**
      * Validates the request
      *
-     * @throws \JsonException
+     * @param array<string, string> $data
      */
     private function validate(array $data): bool
     {
@@ -89,20 +91,22 @@ final class RequestController
      * Deserializes the request to array
      *
      * @throws \JsonException
+     *
+     * @return array<string, string>
      */
-    private function deserialize(ServerRequestInterface $request): array
+    private function unserialize(ServerRequestInterface $request): array
     {
-        return json_decode($request->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        return json_decode($request->getBody()->getContents(), true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
      * Dispatch a request to kafka
      *
      * @throws \Interop\Queue\Exception
-     * @throws InvalidDestinationException
-     * @throws InvalidMessageException
+     * @throws \Interop\Queue\Exception\InvalidDestinationException
+     * @throws \Interop\Queue\Exception\InvalidMessageException
      */
-    private function dispatch(int $id, string $msg, string $topic)
+    private function dispatch(int $id, string $msg, string $topic): void
     {
         $message = $this->context->createMessage($msg, ['id' => $id]);
 
@@ -111,9 +115,13 @@ final class RequestController
 
     /**
      * Returns json response
+     *
+     * @throws \JsonException
+     *
+     * @param array<string, string> $body
      */
     private function json(int $status = 200, array $body = []): ResponseInterface
     {
-        return new Response($status, ['Content-Type' => 'application/json'], json_encode($body));
+        return new Response($status, ['Content-Type' => 'application/json'], json_encode($body, JSON_THROW_ON_ERROR));
     }
 }

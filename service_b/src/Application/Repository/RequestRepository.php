@@ -1,9 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace ServiceB\Repository;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
 
 final class RequestRepository
 {
@@ -17,11 +18,7 @@ final class RequestRepository
     /**
      * Updates a request
      *
-     * @param int    $id
-     * @param string $message
-     *
-     * @return void
-     * @throws Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function update(int $id, string $message): void
     {

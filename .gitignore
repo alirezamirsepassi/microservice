@@ -2,5 +2,6 @@
 .idea/
 .vscode/
 
-# Composer
+# PHP
+.php_cs.cache
 vendor/

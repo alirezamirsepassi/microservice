@@ -1,36 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Requester;
 
-use Exception;
 use Requester\Exception\NoResponseException;
+use RuntimeException;
 use Symfony\Component\HttpClient\Exception\TimeoutException;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class Application
 {
-    private string $id;
+    private int $id;
 
     private HttpClientInterface $client;
 
-    public function __construct(HttpClientInterface $client = null)
+    public function __construct(HttpClientInterface $client)
     {
-        $this->client = $client ?? HttpClient::createForBaseUri('http://broker');
+        $this->client = $client;
     }
 
     /**
      * Bootstrap the application by sending a message "Hi, " to broker
      *
-     * @return void
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \JsonException
      */
     public function boot(): void
     {
@@ -44,23 +41,23 @@ final class Application
             ]
         );
 
-        $this->id = json_decode($response->getContent(), true)['id'];
+        $this->id = json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR)['id'];
     }
 
     /**
      * Request to broker with 1s timout to get response
      *
-     * @throws ClientExceptionInterface
-     * @throws NoResponseException
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws Exception
+     * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
+     * @throws \Requester\Exception\NoResponseException
+     * @throws \Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
+     * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
+     * @throws \RuntimeException
      */
-    public function __invoke()
+    public function __invoke(): void
     {
-        if (!$this->id) {
-            throw new Exception("Application not yet bootstrapped!");
+        if (! $this->id) {
+            throw new RuntimeException('The application is not bootstrapped yet!');
         }
 
         try {

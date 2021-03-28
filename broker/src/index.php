@@ -1,19 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 require __DIR__ . '/../vendor/autoload.php';
 
 // Configure Kafka
-$factory = new \Enqueue\RdKafka\RdKafkaConnectionFactory([
-    'global' => [
-        'group.id' => uniqid('', true),
-        'metadata.broker.list' => 'kafka:9092',
-        'enable.auto.commit' => 'false',
-    ],
-    'topic' => [
-        'auto.offset.reset' => 'beginning',
-    ],
-]);
-
+$factory = new \Enqueue\RdKafka\RdKafkaConnectionFactory(\Broker\ConfigResolver::resolve('kafka'));
 
 // Create the controller
 $controller = new \Broker\Controller\RequestController(
@@ -32,10 +24,8 @@ $routes->post('/requests', [$controller, 'create']);
 $routes->patch('/requests/{id:\d+}', [$controller, 'update']);
 $routes->get('/requests/{id:\d+}', [$controller, 'show']);
 
-
 // Create a react PHP server
 $loop = React\EventLoop\Factory::create();
-
 $server = new React\Http\Server($loop, new \Broker\Router($routes));
 
 $socket = new React\Socket\Server('0.0.0.0:80', $loop);
